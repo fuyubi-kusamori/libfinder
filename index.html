@@ -1,626 +1,1105 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lib Finder Search</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Noto+Serif+JP:wght@200..900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LibFinder Search — 東京都立高等学校図書館目録</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;1,100&family=Josefin+Slab:ital,wght@0,100;0,200;1,100;1,200&family=Noto+Serif+JP:wght@200;300;400&family=Noto+Sans+JP:wght@100;200;300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ground:   #f7f4ee;
+  --surface:  #ede8de;
+  --deep:     #1a1510;
+  --ink:      #241e18;
+  --muted:    #7a6e62;
+  --accent:   #8b3a2a;
+  --accent2:  #5a7a4a;
+  --warm:     #b07840;
+  --rose:     #8c5040;
+  --border:   rgba(36,30,24,0.16);
+  --border-l: rgba(36,30,24,0.09);
 
-    <style>
-        :root {
-            --color-pastel-pink: #ffdbeb;
-            --color-pastel-purple: #e6e6fa;
-            --color-pastel-blue: #d4f1f9;
-            --color-pastel-green: #d1f7c4;
-            --color-pastel-yellow: #fff7d6;
-            --color-pastel-orange: #ffe5cc;
-        }
-        body {
-            font-family: "Noto Sans JP", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 100;
-            font-style: normal;
-            background: linear-gradient(135deg, var(--color-pastel-purple) 0%, var(--color-pastel-blue) 100%);
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-        }
-        .main-title {
-            font-family: "Josefin Sans", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 100;
-            font-style: normal;
-        }
-        .search-container {
-            width: 800px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 0px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        #reset-button {
-            font-family: "Josefin Sans", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 100;
-            font-style: normal;
-        }
-        .category-title {
-            background: linear-gradient(to right, var(--color-pastel-pink), var(--color-pastel-purple));
-            border-radius: 10px;
-            padding: 8px 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .school-card {
-            transition: all 0.3s ease;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-        .school-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-        /* カテゴリーごとの色分け */
-        .east-main {
-            background-color: var(--color-pastel-pink);
-        }
-        .east-branch {
-            background-color: var(--color-pastel-orange);
-        }
-        .central-main {
-            background-color: var(--color-pastel-yellow);
-        }
-        .central-branch {
-            background-color: var(--color-pastel-green);
-        }
-        .west-main {
-            background-color: var(--color-pastel-blue);
-        }
-        .west-branch {
-            background-color: var(--color-pastel-purple);
-        }
-        .special {
-            background: linear-gradient(45deg, var(--color-pastel-pink), var(--color-pastel-blue));
-        }
-        .tab-button {
-            font-family: "Noto Sans JP", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 100;
-            font-style: normal;
-            padding: 8px 16px;
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 4px;
-        }
-        .tab-button:hover {
-            opacity: 0.9;
-        }
-        .tab-button.active {
-            border-bottom: none;
-            font-weight: normal;
-        }
-        .tab-content {
-            display: none;
-            border-radius: 0 0 0 0;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .school-link {
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            display: inline-block;
-            margin: 5px;
-            padding: 8px 12px;
-        }
-        .school-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        .sub-tab-button {
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 8px;
-            margin-bottom: 8px;
-            background-color: rgba(255, 255, 255, 0.7);
-            border: 2px solid transparent;
-        }
-        .sub-tab-button:hover {
-            opacity: 0.9;
-        }
-        .sub-tab-button.active {
-            border-color: #9333ea;
-            font-weight: normal;
-        }
-        .sub-tab-content {
-            display: none;
-        }
-        .sub-tab-content.active {
-            display: block;
-        }
-        @media (max-width: 768px) {
-            .tabs-container {
-                flex-direction: column;
-            }
-            .tab-button {
-                width: 100%;
-                border-radius: 8px;
-                margin-bottom: 4px;
-            }
-        }
-    </style>
+  /* カテゴリーカラー */
+  --east-main:    #8b3a2a;
+  --east-branch:  #b07840;
+  --central-main: #5a7a4a;
+  --central-branch: #7a5a3a;
+  --west-main:    #3a5a7a;
+  --west-branch:  #6a4a6a;
+  --special:      #4a6a5a;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 200;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* grain */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 9000;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply; opacity: 0.7;
+}
+
+/* ── PROGRESS ── */
+.progress-line {
+  position: fixed; top: 0; left: 0; height: 1px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  z-index: 10000; width: 0%; transition: width 0.05s linear;
+}
+
+/* ── MASTHEAD ── */
+.masthead {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(247,244,238,0.97);
+  backdrop-filter: blur(12px);
+}
+.masthead-id {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7.5px; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--ink); font-weight: 300;
+}
+.masthead-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 100; color: rgba(45,43,54,0.4);
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.masthead-num {
+  font-family: 'Josefin Slab', serif;
+  font-size: 9px; letter-spacing: 0.3em;
+  color: var(--accent); font-weight: 200; font-style: italic;
+}
+
+/* ── HERO ── */
+.hero {
+  padding-top: 57px;
+  padding: 57px 56px 0;
+  min-height: 38vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg-kanji {
+  position: absolute;
+  top: 10px; right: -60px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: clamp(180px, 22vw, 320px);
+  font-weight: 200; line-height: 1;
+  color: rgba(139,58,42,0.055);
+  user-select: none; pointer-events: none;
+  letter-spacing: -0.02em;
+}
+
+.hero-inner {
+  padding-top: 80px;
+  padding-bottom: 56px;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 0;
+  align-items: flex-end;
+}
+
+.hero-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.65em; text-transform: uppercase;
+  color: var(--accent); font-weight: 200; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 14px;
+}
+.hero-label::before {
+  content: ''; width: 24px; height: 1px;
+  background: var(--accent); display: block; flex-shrink: 0;
+}
+.hero-h1 {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: clamp(36px, 5vw, 68px);
+  font-weight: 200; line-height: 1.1;
+  letter-spacing: 0.12em; color: var(--deep);
+  margin-bottom: 16px; text-transform: uppercase;
+}
+.hero-h1 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 200;
+}
+.hero-subtitle {
+  font-family: 'Josefin Slab', serif;
+  font-size: 11px; font-weight: 100; font-style: italic;
+  letter-spacing: 0.3em; color: var(--muted);
+  line-height: 1.8;
+}
+
+.hero-right {
+  padding-left: 48px;
+  border-left: 1px solid var(--border-l);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.hero-stat {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-l);
+}
+.hero-stat-n {
+  font-family: 'Josefin Slab', serif;
+  font-size: 32px; font-weight: 100; color: var(--accent);
+  letter-spacing: -0.02em; line-height: 1;
+}
+.hero-stat-l {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--muted); font-weight: 200;
+}
+
+/* ── SEARCH SECTION ── */
+.search-section {
+  padding: 48px 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+
+.search-wrapper {
+  position: relative;
+  max-width: 640px;
+}
+.search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(45,43,54,0.25);
+  padding: 12px 40px 12px 0;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 15px; font-weight: 200;
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.search-input::placeholder {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; letter-spacing: 0.45em;
+  color: var(--muted); font-weight: 200;
+  text-transform: uppercase;
+}
+.search-input:focus {
+  border-bottom-color: var(--accent);
+}
+.search-icon {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.4em;
+  color: var(--muted); text-transform: uppercase; font-weight: 200;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+.search-icon:hover { color: var(--accent); }
+
+.reset-btn {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 200; color: var(--muted);
+  background: none; border: 1px solid var(--border);
+  padding: 10px 20px; cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+.reset-btn:hover {
+  color: var(--accent);
+  border-color: rgba(107,91,140,0.4);
+}
+
+/* ── SEARCH RESULTS ── */
+.search-results-panel {
+  display: none;
+  padding: 40px 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--ground);
+}
+.search-results-panel.visible { display: block; }
+
+.results-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--accent); font-weight: 200; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+.results-label::before {
+  content: ''; width: 20px; height: 1px; background: var(--accent);
+}
+
+/* ── STREAM BREAK ── */
+.stream-break {
+  display: flex; align-items: center;
+  padding: 0 56px;
+}
+.stream-break-line {
+  flex: 1; height: 1px; background: var(--border);
+}
+.stream-break-tag {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 6.5px; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--muted); font-weight: 200;
+  padding: 14px 22px;
+  border: 1px solid var(--border-l);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── NAV TABS ── */
+.nav-section {
+  padding: 0 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-tabs {
+  display: flex;
+  gap: 0;
+  min-width: max-content;
+}
+.nav-tab {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px; letter-spacing: 0.12em;
+  font-weight: 300; color: var(--muted);
+  background: none; border: none;
+  padding: 18px 24px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.25s;
+  white-space: nowrap;
+  border-right: 1px solid var(--border-l);
+}
+.nav-tab::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; background: var(--accent);
+  transform: scaleX(0); transition: transform 0.25s;
+}
+.nav-tab:hover { color: var(--deep); }
+.nav-tab.active {
+  color: var(--accent);
+  background: rgba(139,58,42,0.07);
+  font-weight: 400;
+}
+.nav-tab.active::after { transform: scaleX(1); }
+
+/* ── TAB CONTENT ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── CONTENT LAYOUT ── */
+.content-area {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  min-height: 60vh;
+}
+
+.spine {
+  padding: 56px 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  border-right: 1px solid var(--border-l);
+}
+.spine-num {
+  font-family: 'Josefin Slab', serif;
+  font-size: 7px; font-weight: 100; letter-spacing: 0.55em;
+  color: rgba(45,43,54,0.15);
+  writing-mode: vertical-rl; text-transform: uppercase; font-style: italic;
+}
+.spine-rule {
+  width: 1px; flex: 1;
+  background: linear-gradient(to bottom, transparent, rgba(139,58,42,0.15), transparent);
+  margin: 18px 0;
+}
+.spine-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  border: 1px solid rgba(107,91,140,0.25);
+}
+
+.main-area {
+  padding: 56px 56px 56px 48px;
+}
+
+/* ── SECTION HEADER ── */
+.section-tag {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--accent2); font-weight: 200; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-tag::before {
+  content: ''; width: 16px; height: 1px; background: var(--accent2);
+}
+
+.section-headline {
+  font-family: 'Noto Serif JP', serif;
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 300; line-height: 1.6;
+  color: var(--deep); margin-bottom: 40px;
+  letter-spacing: 0.04em;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border-l);
+}
+
+/* ── SUB TABS ── */
+.sub-nav {
+  display: flex; flex-wrap: wrap; gap: 0;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.sub-tab {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.45em; text-transform: uppercase;
+  font-weight: 200; color: var(--muted);
+  background: none; border: none;
+  padding: 12px 20px; cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.sub-tab::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 1px; background: var(--accent2);
+  transform: scaleX(0); transition: transform 0.25s;
+}
+.sub-tab:hover { color: var(--ink); }
+.sub-tab.active { color: var(--accent2); }
+.sub-tab.active::after { transform: scaleX(1); }
+
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
+
+.sub-headline {
+  font-family: 'Josefin Slab', serif;
+  font-size: 10px; font-style: italic; font-weight: 100;
+  letter-spacing: 0.35em; color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* ── SCHOOL LINKS GRID ── */
+.school-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0;
+}
+
+.school-link {
+  display: block;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 13px; font-weight: 300;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 14px 20px 14px 0;
+  border-bottom: 1px solid var(--border-l);
+  letter-spacing: 0.04em;
+  position: relative;
+  transition: color 0.2s, padding-left 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.school-link::before {
+  content: '';
+  width: 0px; height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+  transition: width 0.25s;
+  opacity: 0.4;
+}
+.school-link:hover {
+  color: var(--accent);
+  padding-left: 4px;
+}
+.school-link:hover::before { width: 12px; }
+
+/* ── カテゴリーカラーの色味変化 ── */
+.east-main:hover  { color: var(--east-main); }
+.east-branch:hover { color: var(--east-branch); }
+.central-main:hover { color: var(--central-main); }
+.central-branch:hover { color: var(--central-branch); }
+.west-main:hover  { color: var(--west-main); }
+.west-branch:hover { color: var(--west-branch); }
+.special-link:hover { color: var(--special); }
+
+/* ── FOOTER ── */
+.footer-colophon {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.footer-col {
+  padding: 40px 28px;
+  border-right: 1px solid var(--border-l);
+}
+.footer-col:last-child { border-right: none; }
+.footer-col-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 6.5px; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--muted); font-weight: 200; margin-bottom: 12px;
+}
+.footer-col-value {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 12px; font-weight: 200;
+  color: rgba(45,43,54,0.6); line-height: 1.9;
+  letter-spacing: 0.06em;
+}
+.footer-col-value em { color: var(--ink); font-style: normal; font-weight: 300; }
+
+.footer-base {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 56px;
+  border-top: 1px solid var(--border-l);
+  background: var(--surface);
+}
+.footer-credit {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--muted); font-weight: 200;
+}
+.footer-end {
+  font-family: 'Josefin Slab', serif;
+  font-size: 11px; font-style: italic; font-weight: 100;
+  letter-spacing: 0.3em; color: rgba(45,43,54,0.25);
+}
+
+/* ── REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .masthead { padding: 14px 20px; }
+  .masthead-title { display: none; }
+  .hero { padding: 57px 20px 0; }
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-right { display: none; }
+  .search-section { padding: 32px 20px; grid-template-columns: 1fr; }
+  .stream-break { padding: 0 20px; }
+  .nav-section { padding: 0 20px; }
+  .content-area { grid-template-columns: 40px 1fr; }
+  .main-area { padding: 32px 20px 32px 16px; }
+  .school-grid { grid-template-columns: 1fr 1fr; }
+  .footer-colophon { grid-template-columns: 1fr 1fr; }
+  .footer-base { padding: 16px 20px; }
+  .search-results-panel { padding: 32px 20px; }
+}
+</style>
 </head>
-<body class="py-8">
-    <div class="container mx-auto px-4">
-        <h1 class="main-title pt-5 text-5xl md:text-5xl font-normal text-center text-pink-400 mb-8 tracking-wider">LibFinder Search<br class="md:hidden"> </h1>
-        
-    <div class="search-container p-4 mb-8 mx-auto" style="max-width: 800px; width: 100%;">
-        <div class="flex flex-col md:flex-row items-center">
-            <div class="relative w-full md:w-9/10 mb-4 md:mb-0">
-                <input type="text" id="search-input" placeholder="学校名を検索..." class="w-full p-3 border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-300">
-                <button id="search-button" class="absolute right-3 top-3 text-gray-500 hover:text-pink-500">
-                <i class="fas fa-search"></i>
-                </button>
-            </div>
-            <div class="flex items-center ml-0 md:ml-4">
-                <button id="reset-button" class="group flex h-10 items-center justify-center rounded-md border border-pink-200 bg-gradient-to-b from-pink-50 via-pink-100 to-pink-50 px-4 text-pink-900 hover:bg-gradient-to-b hover:from-pink-100 hover:via-pink-100 hover:to-pink-100 active:shadow-inner tracking-widest"><span class="block group-active:[transform:translate3d(0,1px,0)]"> Reset </span></button>
-            </div>
-        </div>
-        <div id="search-results" class="hidden mt-4 p-3 bg-white rounded-lg shadow"></div>
+<body>
+
+<div class="progress-line" id="progress"></div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-id">LibFinder — Tokyo Metropolitan</div>
+  <div class="masthead-title">高等学校図書館目録</div>
+  <div class="masthead-num">catalogue 01</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg-kanji">図</div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-label">Tokyo Metropolitan High School Libraries</div>
+      <h1 class="hero-h1">Lib<em>Finder</em><br>Search</h1>
+      <div class="hero-subtitle">東京都立高等学校 · 図書館横断検索システム<br>School Library Directory — 2025</div>
     </div>
-
-        <div class="tabs-container flex flex-wrap mb-0">
-            <button class="tab-button east-main active" onclick="openTab('east-main')">東部センター本所</button>
-            <button class="tab-button east-branch" onclick="openTab('east-branch')">東部センター支所</button>
-            <button class="tab-button central-main" onclick="openTab('central-main')">中部センター本所</button>
-            <button class="tab-button central-branch" onclick="openTab('central-branch')">中部センター支所</button>
-            <button class="tab-button west-main" onclick="openTab('west-main')">西部センター本所</button>
-            <button class="tab-button west-branch" onclick="openTab('west-branch')">西部センター支所</button>
-            <button class="tab-button special" onclick="openTab('special')">専門高校・総合学科</button>
-        </div>
-
-        <!-- 東部センター本所 -->
-        <div id="east-main" class="tab-content active">
-            <h2 class="text-xl font-normal mb-4 text-pink-700">東部学校経営支援センター本所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/aoi/" target="_blank" class="school-link east-main">青井高等学校</a>
-                <a href="https://lib-finder.net/aoyama/" target="_blank" class="school-link east-main">青山高等学校</a>
-                <a href="https://lib-finder.net/asakusa/" target="_blank" class="school-link east-main">浅草高等学校</a>
-                <a href="https://lib-finder.net/adachi/" target="_blank" class="school-link east-main">足立高等学校</a>
-                <a href="https://lib-finder.net/adachishinden/" target="_blank" class="school-link east-main">足立新田高等学校</a>
-                <a href="https://lib-finder.net/adachihigashi/" target="_blank" class="school-link east-main">足立東高等学校</a>
-                <a href="https://lib-finder.net/adachinishi/" target="_blank" class="school-link east-main">足立西高等学校</a>
-                <a href="https://lib-finder.net/takenodai/" target="_blank" class="school-link east-main">竹台高等学校</a>
-                <a href="https://lib-finder.net/ueno/" target="_blank" class="school-link east-main">上野高等学校</a>
-                <a href="https://lib-finder.net/katsushikano/" target="_blank" class="school-link east-main">葛飾野高等学校</a>
-                <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link east-main">葛飾総合高等学校</a>
-                <a href="https://lib-finder.net/minamikatushika/" target="_blank" class="school-link east-main">南葛飾高等学校</a>
-                    <a href="https://lib-finder.net/katsushikashogyo/" target="_blank" class="school-link east-main">葛飾商業高等学校</a>
-                <a href="https://lib-finder.net/kohoku/" target="_blank" class="school-link east-main">江北高等学校</a>
-                <a href="https://lib-finder.net/shinobugaoka/" target="_blank" class="school-link east-main">忍岡高等学校</a>
-                <a href="https://lib-finder.net/takehaya/" target="_blank" class="school-link east-main">竹早高等学校</a>
-                <a href="https://lib-finder.net/hitotsubashi/" target="_blank" class="school-link east-main">一橋高等学校</a>
-                <a href="https://lib-finder.net/hakuo/" target="_blank" class="school-link east-main">白鷗高等学校</a>
-                <a href="https://lib-finder.net/shinjukuyamabuki/" target="_blank" class="school-link east-main">新宿山吹高等学校</a>
-                <a href="https://lib-finder.net/roppongi/" target="_blank" class="school-link east-main">六本木高等学校</a>
-                <a href="https://lib-finder.net/hiroo/" target="_blank" class="school-link east-main">広尾高等学校</a>
-                <a href="https://lib-finder.net/mukogaoka/" target="_blank" class="school-link east-main">向丘高等学校</a>
-                <a href="https://lib-finder.net/kogei/" target="_blank" class="school-link east-main">工芸高等学校</a>
-                <a href="https://lib-finder.net/fuchie/" target="_blank" class="school-link east-main">淵江高等学校</a>
-                <a href="https://lib-finder.net/odaibashi/" target="_blank" class="school-link east-main">小台橋高等学校</a>
-                <a href="https://lib-finder.net/nosan/" target="_blank" class="school-link east-main">農産高等学校</a>
-                <a href="https://lib-finder.net/kuramaekogyo/" target="_blank" class="school-link east-main">蔵前工業高等学校</a>
-                    <a href="https://lib-finder.net/arakawakogyo/" target="_blank" class="school-link east-main">荒川工科高等学校</a>
-                    <a href="https://lib-finder.net/adachikogyo/" target="_blank" class="school-link east-main">足立工科高等学校</a>
-                <a href="https://lib-finder.net/koishikawa/" target="_blank" class="school-link east-main">小石川中等教育学校</a>
-                <a href="https://lib-finder.net/hibiya/" target="_blank" class="school-link east-main">日比谷高等学校</a>
-            </div>
-        </div>
-
-        <!-- 東部センター支所 -->
-        <div id="east-branch" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-orange-700">東部学校経営支援センター支所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/edogawa/" target="_blank" class="school-link east-branch">江戸川高等学校</a>
-                <a href="https://lib-finder.net/koiwa/" target="_blank" class="school-link east-branch">小岩高等学校</a>
-                <a href="https://lib-finder.net/sumidagawa/" target="_blank" class="school-link east-branch">墨田川高等学校</a>
-                <a href="https://lib-finder.net/sumidakogyo/" target="_blank" class="school-link east-branch">墨田工科高等学校</a>
-                <a href="https://lib-finder.net/daisanshogyo/" target="_blank" class="school-link east-branch">第三商業高等学校</a>
-                <a href="https://lib-finder.net/fukagawa/" target="_blank" class="school-link east-branch">深川高等学校</a>
-                <a href="https://lib-finder.net/joto/" target="_blank" class="school-link east-branch">城東高等学校</a>
-                <a href="https://lib-finder.net/nihonbashi/" target="_blank" class="school-link east-branch">日本橋高等学校</a>
-                <a href="https://lib-finder.net/momijigawa/" target="_blank" class="school-link east-branch">紅葉川高等学校</a>
-                <a href="https://lib-finder.net/tachibana/" target="_blank" class="school-link east-branch">橘高等学校</a>
-                <a href="https://lib-finder.net/ohmori/" target="_blank" class="school-link east-branch">大森高等学校</a>
-                <a href="https://lib-finder.net/kamata/" target="_blank" class="school-link east-branch">蒲田高等学校</a>
-                <a href="https://lib-finder.net/harumisogo/" target="_blank" class="school-link east-branch">晴海総合高等学校</a>
-                <a href="https://lib-finder.net/tsubasasogo/" target="_blank" class="school-link east-branch">つばさ総合高等学校</a>
-                <a href="https://lib-finder.net/rokugokoka/" target="_blank" class="school-link east-branch">六郷工科高等学校</a>
-                <a href="https://lib-finder.net/yashio/" target="_blank" class="school-link east-branch">八潮高等学校</a>
-                <a href="https://lib-finder.net/mihara/" target="_blank" class="school-link east-branch">美原高等学校</a>
-                <a href="https://lib-finder.net/shibashogyo/" target="_blank" class="school-link east-branch">芝商業高等学校</a>
-                <a href="https://lib-finder.net/ohtasakuradai/" target="_blank" class="school-link east-branch">大田桜台高等学校</a>
-                <a href="https://lib-finder.net/ryogoku/" target="_blank" class="school-link east-branch">両国高等学校</a>
-                <a href="https://lib-finder.net/honjyo/" target="_blank" class="school-link east-branch">本所高等学校</a>
-                <a href="https://lib-finder.net/higashi/" target="_blank" class="school-link east-branch">東高等学校</a>
-                <a href="https://lib-finder.net/komatsugawa/" target="_blank" class="school-link east-branch">小松川高等学校</a>
-                <a href="https://lib-finder.net/kasaiminami/" target="_blank" class="school-link east-branch">葛西南高等学校</a>
-                <a href="https://lib-finder.net/shinozaki/" target="_blank" class="school-link east-branch">篠崎高等学校</a>
-                <a href="https://lib-finder.net/ohedo/" target="_blank" class="school-link east-branch">大江戸高等学校</a>
-                <a href="https://lib-finder.net/mita/" target="_blank" class="school-link east-branch">三田高等学校</a>
-                <a href="https://lib-finder.net/kotoshogyo/" target="_blank" class="school-link east-branch">江東商業高等学校</a>
-                <a href="https://lib-finder.net/kasaikogyo/" target="_blank" class="school-link east-branch">葛西工科高等学校</a>
-                <a href="https://lib-finder.net/kagakugijyutsu/" target="_blank" class="school-link east-branch">科学技術高等学校</a>
-            </div>
-        </div>
-
-        <!-- 中部センター本所 -->
-        <div id="central-main" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-yellow-700">中部学校経営支援センター本所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/ohsaki/" target="_blank" class="school-link central-main">大崎高等学校</a>
-                <a href="https://lib-finder.net/koyamadai/" target="_blank" class="school-link central-main">小山台高等学校</a>
-                <a href="https://lib-finder.net/yukigaya/" target="_blank" class="school-link central-main">雪谷高等学校</a>
-                <a href="https://lib-finder.net/denenchofu/" target="_blank" class="school-link central-main">田園調布高等学校</a>
-                <a href="https://lib-finder.net/komaba/" target="_blank" class="school-link central-main">駒場高等学校</a>
-                <a href="https://lib-finder.net/meguro/" target="_blank" class="school-link central-main">目黒高等学校</a>
-                <a href="https://lib-finder.net/sinjyuku/" target="_blank" class="school-link central-main">新宿高等学校</a>
-                <a href="https://lib-finder.net/matsubara/" target="_blank" class="school-link central-main">松原高等学校</a>
-                <a href="https://lib-finder.net/sakuramachi/" target="_blank" class="school-link central-main">桜町高等学校</a>
-                <a href="https://lib-finder.net/chitosegaoka/" target="_blank" class="school-link central-main">千歳丘高等学校</a>
-                <a href="https://lib-finder.net/fukasawa/" target="_blank" class="school-link central-main">深沢高等学校</a>
-                <a href="https://lib-finder.net/setagayaizumi/" target="_blank" class="school-link central-main">世田谷泉高等学校</a>
-                <a href="https://lib-finder.net/setagayasogo/" target="_blank" class="school-link central-main">世田谷総合高等学校</a>
-                <a href="https://lib-finder.net/roka/" target="_blank" class="school-link central-main">芦花高等学校</a>
-                <a href="https://lib-finder.net/daiichishogyo/" target="_blank" class="school-link central-main">第一商業高等学校</a>
-                <a href="https://lib-finder.net/sogokoka/" target="_blank" class="school-link central-main">総合工科高等学校</a>
-                <a href="https://lib-finder.net/engei/" target="_blank" class="school-link central-main">園芸高等学校</a>
-                <a href="https://lib-finder.net/133/" target="_blank" class="school-link central-main">国際高等学校</a>
-                <a href="https://lib-finder.net/sogogeijyutsu/" target="_blank" class="school-link central-main">総合芸術高等学校</a>
-                <a href="https://lib-finder.net/fuji/" target="_blank" class="school-link central-main">富士高等学校</a>
-                <a href="https://lib-finder.net/ogikubo/" target="_blank" class="school-link central-main">荻窪高等学校</a>
-                <a href="https://lib-finder.net/nishi/" target="_blank" class="school-link central-main">西高等学校</a>
-                <a href="https://lib-finder.net/toyotama/" target="_blank" class="school-link central-main">豊多摩高等学校</a>
-                <a href="https://lib-finder.net/suginami/" target="_blank" class="school-link central-main">杉並高等学校</a>
-                <a href="https://lib-finder.net/suginamisogo/" target="_blank" class="school-link central-main">杉並総合高等学校</a>
-                <a href="https://lib-finder.net/jindai/" target="_blank" class="school-link central-main">神代高等学校</a>
-                <a href="https://lib-finder.net/chofukita/" target="_blank" class="school-link central-main">調布北高等学校</a>
-                <a href="https://lib-finder.net/komae/" target="_blank" class="school-link central-main">狛江高等学校</a>
-                <a href="https://lib-finder.net/ohshima/" target="_blank" class="school-link central-main">大島高等学校</a>
-                <a href="https://lib-finder.net/niijima/" target="_blank" class="school-link central-main">新島高等学校</a>
-                <a href="https://lib-finder.net/kozu/" target="_blank" class="school-link central-main">神津高等学校</a>
-                <a href="https://lib-finder.net/oshimakaiyokokusai/" target="_blank" class="school-link central-main">大島海洋国際高等学校</a>
-                <a href="https://lib-finder.net/miyake/" target="_blank" class="school-link central-main">三宅高等学校</a>
-                <a href="https://lib-finder.net/hachijyo/" target="_blank" class="school-link central-main">八丈高等学校</a>
-                <a href="https://lib-finder.net/ogasawara/" target="_blank" class="school-link central-main">小笠原高等学校</a>
-                <a href="https://lib-finder.net/oshukan/" target="_blank" class="school-link central-main">桜修館中等教育高等学校</a>
-                <a href="https://lib-finder.net/mitakachutokyoiku/" target="_blank" class="school-link central-main">三鷹中等教育高等学校</a>
-            </div>
-        </div>
-
-        <!-- 中部センター支所 -->
-        <div id="central-branch" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-green-700">中部学校経営支援センター支所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/toyama/" target="_blank" class="school-link central-branch">戸山高等学校</a>
-                <a href="https://lib-finder.net/saginomiya/" target="_blank" class="school-link central-branch">鷺宮高等学校</a>
-                <a href="https://lib-finder.net/musashigaoka/" target="_blank" class="school-link central-branch">武蔵丘高等学校</a>
-                <a href="https://lib-finder.net/shakujii/" target="_blank" class="school-link central-branch">石神井高等学校</a>
-                <a href="https://lib-finder.net/igusa/" target="_blank" class="school-link central-branch">井草高等学校</a>
-                <a href="https://lib-finder.net/oizumi/" target="_blank" class="school-link central-branch">大泉高等学校</a>
-                <a href="https://lib-finder.net/nerima/" target="_blank" class="school-link central-branch">練馬高等学校</a>
-                <a href="https://lib-finder.net/hikarigaoka/" target="_blank" class="school-link central-branch">光丘高等学校</a>
-                <a href="https://lib-finder.net/tagara/" target="_blank" class="school-link central-branch">田柄高等学校</a>
-                <a href="https://lib-finder.net/minorigaoka/" target="_blank" class="school-link central-branch">稔ヶ丘高等学校</a>
-                <a href="https://lib-finder.net/ohizumisakura/" target="_blank" class="school-link central-branch">大泉桜高等学校</a>
-                <a href="https://lib-finder.net/daiyonshogyo/" target="_blank" class="school-link central-branch">第四商業高等学校</a>
-                <a href="https://lib-finder.net/nakanokogyo/" target="_blank" class="school-link central-branch">中野工科高等学校</a>
-                <a href="https://lib-finder.net/suginamikogyo/" target="_blank" class="school-link central-branch">杉並工科高等学校</a>
-                <a href="https://lib-finder.net/nerimakogyo/" target="_blank" class="school-link central-branch">練馬工科高等学校</a>
-                <a href="https://lib-finder.net/nogei/" target="_blank" class="school-link central-branch">農芸高等学校</a>
-                <a href="https://lib-finder.net/toshima/" target="_blank" class="school-link central-branch">豊島高等学校</a>
-                <a href="https://lib-finder.net/bunkyo/" target="_blank" class="school-link central-branch">文京高等学校</a>
-                <a href="https://lib-finder.net/kitazono/" target="_blank" class="school-link central-branch">北園高等学校</a>
-                <a href="https://lib-finder.net/itabashi/" target="_blank" class="school-link central-branch">板橋高等学校</a>
-                <a href="https://lib-finder.net/ohyama/" target="_blank" class="school-link central-branch">大山高等学校</a>
-                <a href="https://lib-finder.net/takashima/" target="_blank" class="school-link central-branch">高島高等学校</a>
-                <a href="https://lib-finder.net/kirigaoka/" target="_blank" class="school-link central-branch">桐ヶ丘高等学校</a>
-                <a href="https://lib-finder.net/ojisogo/" target="_blank" class="school-link central-branch">王子総合高等学校</a>
-                <a href="https://lib-finder.net/asuka/" target="_blank" class="school-link central-branch">飛鳥高等学校</a>
-                <a href="https://lib-finder.net/itabashiyutoku/" target="_blank" class="school-link central-branch">板橋有徳高等学校</a>
-                <a href="https://lib-finder.net/chihaya/" target="_blank" class="school-link central-branch">千早高等学校</a>
-                <a href="https://lib-finder.net/kitatoshimakogyo/" target="_blank" class="school-link central-branch">北豊島工科高等学校</a>
-                <a href="https://lib-finder.net/akabanehokuo/" target="_blank" class="school-link central-branch">赤羽北桜高等学校</a>
-            </div>
-        </div>
-
-        <!-- 西部センター本所 -->
-        <div id="west-main" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-blue-700">西部学校経営支援センター本所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/fujimori/" target="_blank" class="school-link west-main">富士森高等学校</a>
-                <a href="https://lib-finder.net/katakura/" target="_blank" class="school-link west-main">片倉高等学校</a>
-                <a href="https://lib-finder.net/hachiojihigashi/" target="_blank" class="school-link west-main">八王子東高等学校</a>
-                <a href="https://lib-finder.net/hachiojikita/" target="_blank" class="school-link west-main">八王子北高等学校</a>
-                <a href="https://lib-finder.net/matsugaya/" target="_blank" class="school-link west-main">松が谷高等学校</a>
-                <a href="https://lib-finder.net/hinodai/" target="_blank" class="school-link west-main">日野台高等学校</a>
-                <a href="https://lib-finder.net/hino/" target="_blank" class="school-link west-main">日野高等学校</a>
-                <a href="https://lib-finder.net/minamidaira/" target="_blank" class="school-link west-main">南平高等学校</a>
-                <a href="https://lib-finder.net/machida/" target="_blank" class="school-link west-main">町田高等学校</a>
-                <a href="https://lib-finder.net/nozuta/" target="_blank" class="school-link west-main">野津田高等学校</a>
-                <a href="https://lib-finder.net/naruse/" target="_blank" class="school-link west-main">成瀬高等学校</a>
-                <a href="https://lib-finder.net/ogawa/" target="_blank" class="school-link west-main">小川高等学校</a>
-                <a href="https://lib-finder.net/yamasaki/" target="_blank" class="school-link west-main">山崎高等学校</a>
-                <a href="https://lib-finder.net/machidasogo/" target="_blank" class="school-link west-main">町田総合高等学校</a>
-                <a href="https://lib-finder.net/shoyo/" target="_blank" class="school-link west-main">翔陽高等学校</a>
-                <a href="https://lib-finder.net/hachiojitakushin/" target="_blank" class="school-link west-main">八王子拓真高等学校</a>
-                <a href="https://lib-finder.net/machidakogyo/" target="_blank" class="school-link west-main">町田工科高等学校</a>
-                <a href="https://lib-finder.net/hachiojisoshi/" target="_blank" class="school-link west-main">八王子桑志高等学校</a>
-                <a href="https://lib-finder.net/tachikawa/" target="_blank" class="school-link west-main">立川高等学校</a>
-                <a href="https://lib-finder.net/sunagawa/" target="_blank" class="school-link west-main">砂川高等学校</a>
-                <a href="https://lib-finder.net/fuchunishi/" target="_blank" class="school-link west-main">府中西高等学校</a>
-                <a href="https://lib-finder.net/fuchuhigashi/" target="_blank" class="school-link west-main">府中東高等学校</a>
-                <a href="https://lib-finder.net/fuchu/" target="_blank" class="school-link west-main">府中高等学校</a>
-                <a href="https://lib-finder.net/kunitachi/" target="_blank" class="school-link west-main">国立高等学校</a>
-                <a href="https://lib-finder.net/nagayama/" target="_blank" class="school-link west-main">永山高等学校</a>
-                <a href="https://lib-finder.net/wakabasogo/" target="_blank" class="school-link west-main">若葉総合高等学校</a>
-                <a href="https://lib-finder.net/daigoshogyo/" target="_blank" class="school-link west-main">第五商業高等学校</a>
-                <a href="https://lib-finder.net/fuchukoka/" target="_blank" class="school-link west-main">府中工科高等学校</a>
-                <a href="https://lib-finder.net/chofuminami/" target="_blank" class="school-link west-main">調布南高等学校</a>
-                <a href="https://lib-finder.net/syowa/" target="_blank" class="school-link west-main">昭和高等学校</a>
-                <a href="https://lib-finder.net/nogyo/" target="_blank" class="school-link west-main">農業高等学校</a>
-                <a href="https://lib-finder.net/tachikawakokusai/" target="_blank" class="school-link west-main">立川国際中等教育学校</a>
-                <a href="https://lib-finder.net/minamitamachuto/" target="_blank" class="school-link west-main">南多摩中等教育学校</a>
-
-            </div>
-        </div>
-
-        <!-- 西部センター支所 -->
-        <div id="west-branch" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-purple-700">西部学校経営支援センター支所</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                <a href="https://lib-finder.net/haijima/" target="_blank" class="school-link west-branch">拝島高等学校</a>
-                <a href="https://lib-finder.net/higashiyamato/" target="_blank" class="school-link west-branch">東大和高等学校</a>
-                <a href="https://lib-finder.net/musashimurayama/" target="_blank" class="school-link west-branch">武蔵村山高等学校</a>
-                <a href="https://lib-finder.net/higashiyamatominami/" target="_blank" class="school-link west-branch">東大和南高等学校</a>
-                <a href="https://lib-finder.net/tama/" target="_blank" class="school-link west-branch">多摩高等学校</a>
-                <a href="https://lib-finder.net/fussa/" target="_blank" class="school-link west-branch">福生高等学校</a>
-                <a href="https://lib-finder.net/akiru/" target="_blank" class="school-link west-branch">秋留台高等学校</a>
-                <a href="https://lib-finder.net/hamura/" target="_blank" class="school-link west-branch">羽村高等学校</a>
-                <a href="https://lib-finder.net/itsukaichi/" target="_blank" class="school-link west-branch">五日市高等学校</a>
-                <a href="https://lib-finder.net/omesogo/" target="_blank" class="school-link west-branch">青梅総合高等学校</a>
-                <a href="https://lib-finder.net/josui/" target="_blank" class="school-link west-branch">上水高等学校</a>
-                <a href="https://lib-finder.net/mizuhonogei/" target="_blank" class="school-link west-branch">瑞穂農芸高等学校</a>
-                <a href="https://lib-finder.net/musashi/" target="_blank" class="school-link west-branch">武蔵高等学校</a>
-                <a href="https://lib-finder.net/musashinokita/" target="_blank" class="school-link west-branch">武蔵野北高等学校</a>
-                <a href="https://lib-finder.net/koganeikita/" target="_blank" class="school-link west-branch">小金井北高等学校</a>
-                <a href="https://lib-finder.net/hoya/" target="_blank" class="school-link west-branch">保谷高等学校</a>
-                <a href="https://lib-finder.net/kurumenishi/" target="_blank" class="school-link west-branch">久留米西高等学校</a>
-                <a href="https://lib-finder.net/tanashi/" target="_blank" class="school-link west-branch">田無高等学校</a>
-                <a href="https://lib-finder.net/kodaira/" target="_blank" class="school-link west-branch">小平高等学校</a>
-                <a href="https://lib-finder.net/kodairanishi/" target="_blank" class="school-link west-branch">小平西高等学校</a>
-                <a href="https://lib-finder.net/higashimurayamanishi/" target="_blank" class="school-link west-branch">東村山西高等学校</a>
-                <a href="https://lib-finder.net/higashikuremesogo/" target="_blank" class="school-link west-branch">東久留米総合高等学校</a>
-                <a href="https://lib-finder.net/kokubunji/" target="_blank" class="school-link west-branch">国分寺高等学校</a>
-                <a href="https://lib-finder.net/kiyose/" target="_blank" class="school-link west-branch">清瀬高等学校</a>
-                <a href="https://lib-finder.net/kodairaminami/" target="_blank" class="school-link west-branch">小平南高等学校</a>
-                <a href="https://lib-finder.net/tamakoka/" target="_blank" class="school-link west-branch">多摩工科高等学校</a>
-                <a href="https://lib-finder.net/tamakagakugijutsu-koganeikogyo/" target="_blank" class="school-link west-branch">多摩科学技術高等学校・小金井工科高等学校</a>
-                <a href="https://lib-finder.net/tanashikogyo/" target="_blank" class="school-link west-branch">田無工科高等学校</a>
-            </div>
-        </div>
-
-        <!-- 専門高校・総合学科 -->
-        <div id="special" class="tab-content">
-            <h2 class="text-xl font-normal mb-4 text-purple-700">専門高校・総合学科</h2>
-            
-            <!-- サブタブ -->
-            <div class="flex flex-wrap mb-4">
-                <button class="sub-tab-button active" onclick="openSubTab('commercial')">商業科</button>
-                <button class="sub-tab-button" onclick="openSubTab('agriculture')">農業科</button>
-                <button class="sub-tab-button" onclick="openSubTab('industrial')">工業科</button>
-                <button class="sub-tab-button" onclick="openSubTab('comprehensive')">総合学科</button>
-            </div>
-
-            <!-- 商業科 -->
-            <div id="commercial" class="sub-tab-content active">
-                <h3 class="text-lg font-normal mb-3 text-green-700">商業科</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <a href="https://lib-finder.net/shibasho/" target="_blank" class="school-link special">芝商業高等学校</a>
-                    <a href="https://lib-finder.net/ohtasakuradai/" target="_blank" class="school-link special">大田桜台高等学校</a>
-                    <a href="https://lib-finder.net/daiichishogyo/" target="_blank" class="school-link special">第一商業高等学校</a>
-                    <a href="https://lib-finder.net/daiyonshogyo/" target="_blank" class="school-link special">第四商業高等学校</a>
-                    <a href="https://lib-finder.net/chihaya/" target="_blank" class="school-link special">千早高等学校</a>
-                    <a href="https://lib-finder.net/katsushikashogyo/" target="_blank" class="school-link special">葛飾商業高等学校</a>
-                    <a href="https://lib-finder.net/kotoshogyo/" target="_blank" class="school-link special">江東商業高等学校</a>
-                    <a href="https://lib-finder.net/daisanshogyo/" target="_blank" class="school-link special">第三商業高等学校</a>
-                    <a href="https://lib-finder.net/daigoshogyo/" target="_blank" class="school-link special">第五商業高等学校</a>
-                </div>
-            </div>
-
-            <!-- 農業科 -->
-            <div id="agriculture" class="sub-tab-content">
-                <h3 class="text-lg font-normal mb-3 text-blue-700">農業科</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <a href="https://lib-finder.net/engei/" target="_blank" class="school-link special">園芸高等学校</a>
-                    <a href="https://lib-finder.net/nogyo/" target="_blank" class="school-link special">農業高等学校</a>
-                    <a href="https://lib-finder.net/nosan/" target="_blank" class="school-link special">農産高等学校</a>
-                    <a href="https://lib-finder.net/mizuhonogei/" target="_blank" class="school-link special">瑞穂農芸高等学校</a>
-                    <a href="https://lib-finder.net/nogei/" target="_blank" class="school-link special">農芸高等学校</a>
-                    <a href="https://lib-finder.net/ojima/" target="_blank" class="school-link special">大島高等学校</a>
-                    <a href="https://lib-finder.net/miyake/" target="_blank" class="school-link special">三宅高等学校</a>
-                    <a href="https://lib-finder.net/hachijo/" target="_blank" class="school-link special">八丈高等学校</a>
-                </div>
-            </div>
-
-            <!-- 工業科 -->
-            <div id="industrial" class="sub-tab-content">
-                <h3 class="text-lg font-normal mb-3 text-red-700">工業科</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <a href="https://lib-finder.net/sogokoka/" target="_blank" class="school-link special">総合工科高等学校</a>
-                    <a href="https://lib-finder.net/nakanokogyo/" target="_blank" class="school-link special">中野工科高等学校</a>
-                    <a href="https://lib-finder.net/suginamikogyo/" target="_blank" class="school-link special">杉並工科高等学校</a>
-                    <a href="https://lib-finder.net/nerimakogyo/" target="_blank" class="school-link special">練馬工科高等学校</a>
-                    <a href="https://lib-finder.net/kogei/" target="_blank" class="school-link special">工芸高等学校</a>
-                    <a href="https://lib-finder.net/kitastohimakogyo/" target="_blank" class="school-link special">北豊島工科高等学校</a>
-                    <a href="https://lib-finder.net/kuramaekogyo/" target="_blank" class="school-link special">蔵前工科高等学校</a>
-                    <a href="https://lib-finder.net/arakawakogyo/" target="_blank" class="school-link special">荒川工科高等学校</a>
-                    <a href="https://lib-finder.net/kagakugijutsu/" target="_blank" class="school-link special">科学技術高等学校</a>
-                    <a href="https://lib-finder.net/sumidakogyo/" target="_blank" class="school-link special">墨田工科高等学校</a>
-                    <a href="https://lib-finder.net/machidakogyo/" target="_blank" class="school-link special">町田工科高等学校</a>
-                    <a href="https://lib-finder.net/kasaikogyo/" target="_blank" class="school-link special">葛西工科高等学校</a>
-                    <a href="https://lib-finder.net/adachikogyo/" target="_blank" class="school-link special">足立工科高等学校</a>
-                    <a href="https://lib-finder.net/tamakogyo/" target="_blank" class="school-link special">多摩工科高等学校</a>
-                    <a href="https://lib-finder.net/tamakagakugijutsu/" target="_blank" class="school-link special">多摩科学技術高等学校・小金井工科高等学校</a>
-                    <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link special">葛飾総合高等学校・本所工科高等学校</a>
-                    <a href="https://lib-finder.net/tanashikogyo/" target="_blank" class="school-link special">田無工科高等学校</a>
-                    <a href="https://lib-finder.net/fuchukogyo/" target="_blank" class="school-link special">府中工科高等学校</a>
-                    <a href="https://lib-finder.net/rokugokoka/" target="_blank" class="school-link special">六郷工科高等学校</a>
-                </div>
-            </div>
-
-            <!-- 総合学科 -->
-            <div id="comprehensive" class="sub-tab-content">
-                <h3 class="text-lg font-normal mb-3 text-purple-700">総合学科</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <a href="https://lib-finder.net/tsubasasogo/" target="_blank" class="school-link special">つばさ総合高等学校</a>
-                    <a href="https://lib-finder.net/setagayasogo/" target="_blank" class="school-link special">世田谷総合高等学校</a>
-                    <a href="https://lib-finder.net/suginamisogo/" target="_blank" class="school-link special">杉並総合高等学校</a>
-                    <a href="https://lib-finder.net/ojisogo/" target="_blank" class="school-link special">王子総合高等学校</a>
-                    <a href="https://lib-finder.net/harumisogo/" target="_blank" class="school-link special">晴海総合高等学校</a>
-                    <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link special">葛飾総合高等学校・本所工科高等学校</a>
-                    <a href="https://lib-finder.net/machidasogo/" target="_blank" class="school-link special">町田総合高等学校</a>
-                    <a href="https://lib-finder.net/omesogo/" target="_blank" class="school-link special">青梅総合高等学校</a>
-                    <a href="https://lib-finder.net/higashikurumesogo/" target="_blank" class="school-link special">東久留米総合高等学校</a>
-                    <a href="https://lib-finder.net/wakabasogo/" target="_blank" class="school-link special">若葉総合高等学校</a>
-                    <a href="https://lib-finder.net/roppongi/" target="_blank" class="school-link special">六本木高等学校</a>
-                    <a href="https://lib-finder.net/setagayaizumi/" target="_blank" class="school-link special">世田谷泉高等学校</a>
-                    <a href="https://lib-finder.net/minorigaoka/" target="_blank" class="school-link special">稔ヶ丘高等学校</a>
-                    <a href="https://lib-finder.net/kirigaoka/" target="_blank" class="school-link special">桐ヶ丘高等学校</a>
-                    <a href="https://lib-finder.net/ohedo/" target="_blank" class="school-link special">大江戸高等学校</a>
-                    <a href="https://lib-finder.net/odaibashi/" target="_blank" class="school-link special">小台橋高等学校</a>
-                </div>
-            </div>
-        </div>
+    <div class="hero-right">
+      <div class="hero-stat">
+        <span class="hero-stat-n">200+</span>
+        <span class="hero-stat-l">登録校数</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">7</span>
+        <span class="hero-stat-l">カテゴリー</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-n">3</span>
+        <span class="hero-stat-l">支援センター</span>
+      </div>
     </div>
-    
-    <div class="text-center mt-8 mb-4">
-        <p class="text-gray-500 text-sm"></p>
-        <p class="text-gray-400 text-xs mt-1"></p>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrapper">
+    <input type="text" id="search-input" class="search-input" placeholder="Search school name / 学校名を入力">
+    <button class="search-icon" id="search-button">Search</button>
+  </div>
+  <button class="reset-btn" id="reset-button">Reset</button>
+</div>
+
+<!-- SEARCH RESULTS -->
+<div class="search-results-panel" id="search-results">
+  <div class="results-label" id="results-label">Results</div>
+  <div class="school-grid" id="results-grid"></div>
+</div>
+
+<div class="stream-break">
+  <div class="stream-break-line"></div>
+  <div class="stream-break-tag">Browse by Category — カテゴリー別</div>
+  <div class="stream-break-line"></div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-section">
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="east-main">東部センター本所</button>
+    <button class="nav-tab" data-tab="east-branch">東部センター支所</button>
+    <button class="nav-tab" data-tab="central-main">中部センター本所</button>
+    <button class="nav-tab" data-tab="central-branch">中部センター支所</button>
+    <button class="nav-tab" data-tab="west-main">西部センター本所</button>
+    <button class="nav-tab" data-tab="west-branch">西部センター支所</button>
+    <button class="nav-tab" data-tab="special">専門高校・総合学科</button>
+  </div>
+</div>
+
+<!-- ── 東部センター本所 ── -->
+<div class="tab-panel active" id="east-main">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">East / Main</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
     </div>
+    <div class="main-area">
+      <div class="section-tag reveal">東部学校経営支援センター本所</div>
+      <div class="section-headline reveal">東部センター本所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/aoi/" target="_blank" class="school-link east-main">青井高等学校</a>
+        <a href="https://lib-finder.net/aoyama/" target="_blank" class="school-link east-main">青山高等学校</a>
+        <a href="https://lib-finder.net/asakusa/" target="_blank" class="school-link east-main">浅草高等学校</a>
+        <a href="https://lib-finder.net/adachi/" target="_blank" class="school-link east-main">足立高等学校</a>
+        <a href="https://lib-finder.net/adachishinden/" target="_blank" class="school-link east-main">足立新田高等学校</a>
+        <a href="https://lib-finder.net/adachihigashi/" target="_blank" class="school-link east-main">足立東高等学校</a>
+        <a href="https://lib-finder.net/adachinishi/" target="_blank" class="school-link east-main">足立西高等学校</a>
+        <a href="https://lib-finder.net/takenodai/" target="_blank" class="school-link east-main">竹台高等学校</a>
+        <a href="https://lib-finder.net/ueno/" target="_blank" class="school-link east-main">上野高等学校</a>
+        <a href="https://lib-finder.net/katsushikano/" target="_blank" class="school-link east-main">葛飾野高等学校</a>
+        <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link east-main">葛飾総合高等学校</a>
+        <a href="https://lib-finder.net/minamikatushika/" target="_blank" class="school-link east-main">南葛飾高等学校</a>
+        <a href="https://lib-finder.net/katsushikashogyo/" target="_blank" class="school-link east-main">葛飾商業高等学校</a>
+        <a href="https://lib-finder.net/kohoku/" target="_blank" class="school-link east-main">江北高等学校</a>
+        <a href="https://lib-finder.net/shinobugaoka/" target="_blank" class="school-link east-main">忍岡高等学校</a>
+        <a href="https://lib-finder.net/takehaya/" target="_blank" class="school-link east-main">竹早高等学校</a>
+        <a href="https://lib-finder.net/hitotsubashi/" target="_blank" class="school-link east-main">一橋高等学校</a>
+        <a href="https://lib-finder.net/hakuo/" target="_blank" class="school-link east-main">白鷗高等学校</a>
+        <a href="https://lib-finder.net/shinjukuyamabuki/" target="_blank" class="school-link east-main">新宿山吹高等学校</a>
+        <a href="https://lib-finder.net/roppongi/" target="_blank" class="school-link east-main">六本木高等学校</a>
+        <a href="https://lib-finder.net/hiroo/" target="_blank" class="school-link east-main">広尾高等学校</a>
+        <a href="https://lib-finder.net/mukogaoka/" target="_blank" class="school-link east-main">向丘高等学校</a>
+        <a href="https://lib-finder.net/kogei/" target="_blank" class="school-link east-main">工芸高等学校</a>
+        <a href="https://lib-finder.net/fuchie/" target="_blank" class="school-link east-main">淵江高等学校</a>
+        <a href="https://lib-finder.net/odaibashi/" target="_blank" class="school-link east-main">小台橋高等学校</a>
+        <a href="https://lib-finder.net/nosan/" target="_blank" class="school-link east-main">農産高等学校</a>
+        <a href="https://lib-finder.net/kuramaekogyo/" target="_blank" class="school-link east-main">蔵前工業高等学校</a>
+        <a href="https://lib-finder.net/arakawakogyo/" target="_blank" class="school-link east-main">荒川工科高等学校</a>
+        <a href="https://lib-finder.net/adachikogyo/" target="_blank" class="school-link east-main">足立工科高等学校</a>
+        <a href="https://lib-finder.net/koishikawa/" target="_blank" class="school-link east-main">小石川中等教育学校</a>
+        <a href="https://lib-finder.net/hibiya/" target="_blank" class="school-link east-main">日比谷高等学校</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        // タブ切り替え機能
-        function openTab(tabName) {
-            const tabContents = document.getElementsByClassName('tab-content');
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].classList.remove('active');
-            }
-            
-            const tabButtons = document.getElementsByClassName('tab-button');
-            for (let i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].classList.remove('active');
-            }
-            
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`.tab-button[onclick="openTab('${tabName}')"]`).classList.add('active');
-        }
+<!-- ── 東部センター支所 ── -->
+<div class="tab-panel" id="east-branch">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">East / Branch</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">東部学校経営支援センター支所</div>
+      <div class="section-headline reveal">東部センター支所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/edogawa/" target="_blank" class="school-link east-branch">江戸川高等学校</a>
+        <a href="https://lib-finder.net/koiwa/" target="_blank" class="school-link east-branch">小岩高等学校</a>
+        <a href="https://lib-finder.net/sumidagawa/" target="_blank" class="school-link east-branch">墨田川高等学校</a>
+        <a href="https://lib-finder.net/sumidakogyo/" target="_blank" class="school-link east-branch">墨田工科高等学校</a>
+        <a href="https://lib-finder.net/daisanshogyo/" target="_blank" class="school-link east-branch">第三商業高等学校</a>
+        <a href="https://lib-finder.net/fukagawa/" target="_blank" class="school-link east-branch">深川高等学校</a>
+        <a href="https://lib-finder.net/joto/" target="_blank" class="school-link east-branch">城東高等学校</a>
+        <a href="https://lib-finder.net/nihonbashi/" target="_blank" class="school-link east-branch">日本橋高等学校</a>
+        <a href="https://lib-finder.net/momijigawa/" target="_blank" class="school-link east-branch">紅葉川高等学校</a>
+        <a href="https://lib-finder.net/tachibana/" target="_blank" class="school-link east-branch">橘高等学校</a>
+        <a href="https://lib-finder.net/ohmori/" target="_blank" class="school-link east-branch">大森高等学校</a>
+        <a href="https://lib-finder.net/kamata/" target="_blank" class="school-link east-branch">蒲田高等学校</a>
+        <a href="https://lib-finder.net/harumisogo/" target="_blank" class="school-link east-branch">晴海総合高等学校</a>
+        <a href="https://lib-finder.net/tsubasasogo/" target="_blank" class="school-link east-branch">つばさ総合高等学校</a>
+        <a href="https://lib-finder.net/rokugokoka/" target="_blank" class="school-link east-branch">六郷工科高等学校</a>
+        <a href="https://lib-finder.net/yashio/" target="_blank" class="school-link east-branch">八潮高等学校</a>
+        <a href="https://lib-finder.net/mihara/" target="_blank" class="school-link east-branch">美原高等学校</a>
+        <a href="https://lib-finder.net/shibashogyo/" target="_blank" class="school-link east-branch">芝商業高等学校</a>
+        <a href="https://lib-finder.net/ohtasakuradai/" target="_blank" class="school-link east-branch">大田桜台高等学校</a>
+        <a href="https://lib-finder.net/ryogoku/" target="_blank" class="school-link east-branch">両国高等学校</a>
+        <a href="https://lib-finder.net/honjyo/" target="_blank" class="school-link east-branch">本所高等学校</a>
+        <a href="https://lib-finder.net/higashi/" target="_blank" class="school-link east-branch">東高等学校</a>
+        <a href="https://lib-finder.net/komatsugawa/" target="_blank" class="school-link east-branch">小松川高等学校</a>
+        <a href="https://lib-finder.net/kasaiminami/" target="_blank" class="school-link east-branch">葛西南高等学校</a>
+        <a href="https://lib-finder.net/shinozaki/" target="_blank" class="school-link east-branch">篠崎高等学校</a>
+        <a href="https://lib-finder.net/ohedo/" target="_blank" class="school-link east-branch">大江戸高等学校</a>
+        <a href="https://lib-finder.net/mita/" target="_blank" class="school-link east-branch">三田高等学校</a>
+        <a href="https://lib-finder.net/kotoshogyo/" target="_blank" class="school-link east-branch">江東商業高等学校</a>
+        <a href="https://lib-finder.net/kasaikogyo/" target="_blank" class="school-link east-branch">葛西工科高等学校</a>
+        <a href="https://lib-finder.net/kagakugijyutsu/" target="_blank" class="school-link east-branch">科学技術高等学校</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-        // サブタブ切り替え機能
-        function openSubTab(subTabName) {
-            const subTabContents = document.getElementsByClassName('sub-tab-content');
-            for (let i = 0; i < subTabContents.length; i++) {
-                subTabContents[i].classList.remove('active');
-            }
-            
-            const subTabButtons = document.getElementsByClassName('sub-tab-button');
-            for (let i = 0; i < subTabButtons.length; i++) {
-                subTabButtons[i].classList.remove('active');
-            }
-            
-            document.getElementById(subTabName).classList.add('active');
-            document.querySelector(`.sub-tab-button[onclick="openSubTab('${subTabName}')"]`).classList.add('active');
-        }
+<!-- ── 中部センター本所 ── -->
+<div class="tab-panel" id="central-main">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">Central / Main</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">中部学校経営支援センター本所</div>
+      <div class="section-headline reveal">中部センター本所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/ohsaki/" target="_blank" class="school-link central-main">大崎高等学校</a>
+        <a href="https://lib-finder.net/koyamadai/" target="_blank" class="school-link central-main">小山台高等学校</a>
+        <a href="https://lib-finder.net/yukigaya/" target="_blank" class="school-link central-main">雪谷高等学校</a>
+        <a href="https://lib-finder.net/denenchofu/" target="_blank" class="school-link central-main">田園調布高等学校</a>
+        <a href="https://lib-finder.net/komaba/" target="_blank" class="school-link central-main">駒場高等学校</a>
+        <a href="https://lib-finder.net/meguro/" target="_blank" class="school-link central-main">目黒高等学校</a>
+        <a href="https://lib-finder.net/sinjyuku/" target="_blank" class="school-link central-main">新宿高等学校</a>
+        <a href="https://lib-finder.net/matsubara/" target="_blank" class="school-link central-main">松原高等学校</a>
+        <a href="https://lib-finder.net/sakuramachi/" target="_blank" class="school-link central-main">桜町高等学校</a>
+        <a href="https://lib-finder.net/chitosegaoka/" target="_blank" class="school-link central-main">千歳丘高等学校</a>
+        <a href="https://lib-finder.net/fukasawa/" target="_blank" class="school-link central-main">深沢高等学校</a>
+        <a href="https://lib-finder.net/setagayaizumi/" target="_blank" class="school-link central-main">世田谷泉高等学校</a>
+        <a href="https://lib-finder.net/setagayasogo/" target="_blank" class="school-link central-main">世田谷総合高等学校</a>
+        <a href="https://lib-finder.net/roka/" target="_blank" class="school-link central-main">芦花高等学校</a>
+        <a href="https://lib-finder.net/daiichishogyo/" target="_blank" class="school-link central-main">第一商業高等学校</a>
+        <a href="https://lib-finder.net/sogokoka/" target="_blank" class="school-link central-main">総合工科高等学校</a>
+        <a href="https://lib-finder.net/engei/" target="_blank" class="school-link central-main">園芸高等学校</a>
+        <a href="https://lib-finder.net/133/" target="_blank" class="school-link central-main">国際高等学校</a>
+        <a href="https://lib-finder.net/sogogeijyutsu/" target="_blank" class="school-link central-main">総合芸術高等学校</a>
+        <a href="https://lib-finder.net/fuji/" target="_blank" class="school-link central-main">富士高等学校</a>
+        <a href="https://lib-finder.net/ogikubo/" target="_blank" class="school-link central-main">荻窪高等学校</a>
+        <a href="https://lib-finder.net/nishi/" target="_blank" class="school-link central-main">西高等学校</a>
+        <a href="https://lib-finder.net/toyotama/" target="_blank" class="school-link central-main">豊多摩高等学校</a>
+        <a href="https://lib-finder.net/suginami/" target="_blank" class="school-link central-main">杉並高等学校</a>
+        <a href="https://lib-finder.net/suginamisogo/" target="_blank" class="school-link central-main">杉並総合高等学校</a>
+        <a href="https://lib-finder.net/jindai/" target="_blank" class="school-link central-main">神代高等学校</a>
+        <a href="https://lib-finder.net/chofukita/" target="_blank" class="school-link central-main">調布北高等学校</a>
+        <a href="https://lib-finder.net/komae/" target="_blank" class="school-link central-main">狛江高等学校</a>
+        <a href="https://lib-finder.net/ohshima/" target="_blank" class="school-link central-main">大島高等学校</a>
+        <a href="https://lib-finder.net/niijima/" target="_blank" class="school-link central-main">新島高等学校</a>
+        <a href="https://lib-finder.net/kozu/" target="_blank" class="school-link central-main">神津高等学校</a>
+        <a href="https://lib-finder.net/oshimakaiyokokusai/" target="_blank" class="school-link central-main">大島海洋国際高等学校</a>
+        <a href="https://lib-finder.net/miyake/" target="_blank" class="school-link central-main">三宅高等学校</a>
+        <a href="https://lib-finder.net/hachijyo/" target="_blank" class="school-link central-main">八丈高等学校</a>
+        <a href="https://lib-finder.net/ogasawara/" target="_blank" class="school-link central-main">小笠原高等学校</a>
+        <a href="https://lib-finder.net/oshukan/" target="_blank" class="school-link central-main">桜修館中等教育高等学校</a>
+        <a href="https://lib-finder.net/mitakachutokyoiku/" target="_blank" class="school-link central-main">三鷹中等教育高等学校</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-        // 検索機能
-        document.getElementById('search-button').addEventListener('click', searchSchools);
-        document.getElementById('search-input').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                searchSchools();
-            }
-        });
-        
-        document.getElementById('reset-button').addEventListener('click', function() {
-            document.getElementById('search-input').value = '';
-            document.getElementById('search-results').innerHTML = '';
-            document.getElementById('search-results').classList.add('hidden');
-            
-            const tabContents = document.getElementsByClassName('tab-content');
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = tabContents[i].classList.contains('active') ? 'block' : 'none';
-            }
-        });
+<!-- ── 中部センター支所 ── -->
+<div class="tab-panel" id="central-branch">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">Central / Branch</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">中部学校経営支援センター支所</div>
+      <div class="section-headline reveal">中部センター支所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/toyama/" target="_blank" class="school-link central-branch">戸山高等学校</a>
+        <a href="https://lib-finder.net/saginomiya/" target="_blank" class="school-link central-branch">鷺宮高等学校</a>
+        <a href="https://lib-finder.net/musashigaoka/" target="_blank" class="school-link central-branch">武蔵丘高等学校</a>
+        <a href="https://lib-finder.net/shakujii/" target="_blank" class="school-link central-branch">石神井高等学校</a>
+        <a href="https://lib-finder.net/igusa/" target="_blank" class="school-link central-branch">井草高等学校</a>
+        <a href="https://lib-finder.net/oizumi/" target="_blank" class="school-link central-branch">大泉高等学校</a>
+        <a href="https://lib-finder.net/nerima/" target="_blank" class="school-link central-branch">練馬高等学校</a>
+        <a href="https://lib-finder.net/hikarigaoka/" target="_blank" class="school-link central-branch">光丘高等学校</a>
+        <a href="https://lib-finder.net/tagara/" target="_blank" class="school-link central-branch">田柄高等学校</a>
+        <a href="https://lib-finder.net/minorigaoka/" target="_blank" class="school-link central-branch">稔ヶ丘高等学校</a>
+        <a href="https://lib-finder.net/ohizumisakura/" target="_blank" class="school-link central-branch">大泉桜高等学校</a>
+        <a href="https://lib-finder.net/daiyonshogyo/" target="_blank" class="school-link central-branch">第四商業高等学校</a>
+        <a href="https://lib-finder.net/nakanokogyo/" target="_blank" class="school-link central-branch">中野工科高等学校</a>
+        <a href="https://lib-finder.net/suginamikogyo/" target="_blank" class="school-link central-branch">杉並工科高等学校</a>
+        <a href="https://lib-finder.net/nerimakogyo/" target="_blank" class="school-link central-branch">練馬工科高等学校</a>
+        <a href="https://lib-finder.net/nogei/" target="_blank" class="school-link central-branch">農芸高等学校</a>
+        <a href="https://lib-finder.net/toshima/" target="_blank" class="school-link central-branch">豊島高等学校</a>
+        <a href="https://lib-finder.net/bunkyo/" target="_blank" class="school-link central-branch">文京高等学校</a>
+        <a href="https://lib-finder.net/kitazono/" target="_blank" class="school-link central-branch">北園高等学校</a>
+        <a href="https://lib-finder.net/itabashi/" target="_blank" class="school-link central-branch">板橋高等学校</a>
+        <a href="https://lib-finder.net/ohyama/" target="_blank" class="school-link central-branch">大山高等学校</a>
+        <a href="https://lib-finder.net/takashima/" target="_blank" class="school-link central-branch">高島高等学校</a>
+        <a href="https://lib-finder.net/kirigaoka/" target="_blank" class="school-link central-branch">桐ヶ丘高等学校</a>
+        <a href="https://lib-finder.net/ojisogo/" target="_blank" class="school-link central-branch">王子総合高等学校</a>
+        <a href="https://lib-finder.net/asuka/" target="_blank" class="school-link central-branch">飛鳥高等学校</a>
+        <a href="https://lib-finder.net/itabashiyutoku/" target="_blank" class="school-link central-branch">板橋有徳高等学校</a>
+        <a href="https://lib-finder.net/chihaya/" target="_blank" class="school-link central-branch">千早高等学校</a>
+        <a href="https://lib-finder.net/kitatoshimakogyo/" target="_blank" class="school-link central-branch">北豊島工科高等学校</a>
+        <a href="https://lib-finder.net/akabanehokuo/" target="_blank" class="school-link central-branch">赤羽北桜高等学校</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function searchSchools() {
-            const searchInput = document.getElementById('search-input').value.toLowerCase();
-            if (searchInput.length < 1) return;
-            
-            const searchResults = document.getElementById('search-results');
-            searchResults.innerHTML = '';
-            searchResults.classList.remove('hidden');
-            
-            const links = document.querySelectorAll('.school-link');
-            const foundLinks = [];
-            
-            links.forEach(link => {
-                if (link.textContent.toLowerCase().includes(searchInput)) {
-                    foundLinks.push(link.cloneNode(true));
-                }
-            });
-            
-            if (foundLinks.length > 0) {
-                const resultTitle = document.createElement('h3');
-                resultTitle.className = 'font-normal mb-3 text-pink-700';
-                resultTitle.textContent = `検索結果: ${foundLinks.length}件`;
-                searchResults.appendChild(resultTitle);
-                
-                const resultGrid = document.createElement('div');
-                resultGrid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3';
-                
-                foundLinks.forEach(link => {
-                    resultGrid.appendChild(link);
-                });
-                
-                searchResults.appendChild(resultGrid);
-            } else {
-                const noResult = document.createElement('p');
-                noResult.className = 'text-center p-4 text-gray-500';
-                noResult.textContent = '検索結果が見つかりませんでした';
-                searchResults.appendChild(noResult);
-            }
-            
-            // 全てのタブを非表示にする
-            const tabContents = document.getElementsByClassName('tab-content');
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = 'none';
-            }
-        }
+<!-- ── 西部センター本所 ── -->
+<div class="tab-panel" id="west-main">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">West / Main</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">西部学校経営支援センター本所</div>
+      <div class="section-headline reveal">西部センター本所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/fujimori/" target="_blank" class="school-link west-main">富士森高等学校</a>
+        <a href="https://lib-finder.net/katakura/" target="_blank" class="school-link west-main">片倉高等学校</a>
+        <a href="https://lib-finder.net/hachiojihigashi/" target="_blank" class="school-link west-main">八王子東高等学校</a>
+        <a href="https://lib-finder.net/hachiojikita/" target="_blank" class="school-link west-main">八王子北高等学校</a>
+        <a href="https://lib-finder.net/matsugaya/" target="_blank" class="school-link west-main">松が谷高等学校</a>
+        <a href="https://lib-finder.net/hinodai/" target="_blank" class="school-link west-main">日野台高等学校</a>
+        <a href="https://lib-finder.net/hino/" target="_blank" class="school-link west-main">日野高等学校</a>
+        <a href="https://lib-finder.net/minamidaira/" target="_blank" class="school-link west-main">南平高等学校</a>
+        <a href="https://lib-finder.net/machida/" target="_blank" class="school-link west-main">町田高等学校</a>
+        <a href="https://lib-finder.net/nozuta/" target="_blank" class="school-link west-main">野津田高等学校</a>
+        <a href="https://lib-finder.net/naruse/" target="_blank" class="school-link west-main">成瀬高等学校</a>
+        <a href="https://lib-finder.net/ogawa/" target="_blank" class="school-link west-main">小川高等学校</a>
+        <a href="https://lib-finder.net/yamasaki/" target="_blank" class="school-link west-main">山崎高等学校</a>
+        <a href="https://lib-finder.net/machidasogo/" target="_blank" class="school-link west-main">町田総合高等学校</a>
+        <a href="https://lib-finder.net/shoyo/" target="_blank" class="school-link west-main">翔陽高等学校</a>
+        <a href="https://lib-finder.net/hachiojitakushin/" target="_blank" class="school-link west-main">八王子拓真高等学校</a>
+        <a href="https://lib-finder.net/machidakogyo/" target="_blank" class="school-link west-main">町田工科高等学校</a>
+        <a href="https://lib-finder.net/hachiojisoshi/" target="_blank" class="school-link west-main">八王子桑志高等学校</a>
+        <a href="https://lib-finder.net/tachikawa/" target="_blank" class="school-link west-main">立川高等学校</a>
+        <a href="https://lib-finder.net/sunagawa/" target="_blank" class="school-link west-main">砂川高等学校</a>
+        <a href="https://lib-finder.net/fuchunishi/" target="_blank" class="school-link west-main">府中西高等学校</a>
+        <a href="https://lib-finder.net/fuchuhigashi/" target="_blank" class="school-link west-main">府中東高等学校</a>
+        <a href="https://lib-finder.net/fuchu/" target="_blank" class="school-link west-main">府中高等学校</a>
+        <a href="https://lib-finder.net/kunitachi/" target="_blank" class="school-link west-main">国立高等学校</a>
+        <a href="https://lib-finder.net/nagayama/" target="_blank" class="school-link west-main">永山高等学校</a>
+        <a href="https://lib-finder.net/wakabasogo/" target="_blank" class="school-link west-main">若葉総合高等学校</a>
+        <a href="https://lib-finder.net/daigoshogyo/" target="_blank" class="school-link west-main">第五商業高等学校</a>
+        <a href="https://lib-finder.net/fuchukoka/" target="_blank" class="school-link west-main">府中工科高等学校</a>
+        <a href="https://lib-finder.net/chofuminami/" target="_blank" class="school-link west-main">調布南高等学校</a>
+        <a href="https://lib-finder.net/syowa/" target="_blank" class="school-link west-main">昭和高等学校</a>
+        <a href="https://lib-finder.net/nogyo/" target="_blank" class="school-link west-main">農業高等学校</a>
+        <a href="https://lib-finder.net/tachikawakokusai/" target="_blank" class="school-link west-main">立川国際中等教育学校</a>
+        <a href="https://lib-finder.net/minamitamachuto/" target="_blank" class="school-link west-main">南多摩中等教育学校</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-        // 最初のタブをアクティブに
-        document.addEventListener('DOMContentLoaded', function() {
-            openTab('east-main');
-            openSubTab('commercial');
-        });
-    </script>
+<!-- ── 西部センター支所 ── -->
+<div class="tab-panel" id="west-branch">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">West / Branch</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">西部学校経営支援センター支所</div>
+      <div class="section-headline reveal">西部センター支所</div>
+      <div class="school-grid reveal">
+        <a href="https://lib-finder.net/haijima/" target="_blank" class="school-link west-branch">拝島高等学校</a>
+        <a href="https://lib-finder.net/higashiyamato/" target="_blank" class="school-link west-branch">東大和高等学校</a>
+        <a href="https://lib-finder.net/musashimurayama/" target="_blank" class="school-link west-branch">武蔵村山高等学校</a>
+        <a href="https://lib-finder.net/higashiyamatominami/" target="_blank" class="school-link west-branch">東大和南高等学校</a>
+        <a href="https://lib-finder.net/tama/" target="_blank" class="school-link west-branch">多摩高等学校</a>
+        <a href="https://lib-finder.net/fussa/" target="_blank" class="school-link west-branch">福生高等学校</a>
+        <a href="https://lib-finder.net/akiru/" target="_blank" class="school-link west-branch">秋留台高等学校</a>
+        <a href="https://lib-finder.net/hamura/" target="_blank" class="school-link west-branch">羽村高等学校</a>
+        <a href="https://lib-finder.net/itsukaichi/" target="_blank" class="school-link west-branch">五日市高等学校</a>
+        <a href="https://lib-finder.net/omesogo/" target="_blank" class="school-link west-branch">青梅総合高等学校</a>
+        <a href="https://lib-finder.net/josui/" target="_blank" class="school-link west-branch">上水高等学校</a>
+        <a href="https://lib-finder.net/mizuhonogei/" target="_blank" class="school-link west-branch">瑞穂農芸高等学校</a>
+        <a href="https://lib-finder.net/musashi/" target="_blank" class="school-link west-branch">武蔵高等学校</a>
+        <a href="https://lib-finder.net/musashinokita/" target="_blank" class="school-link west-branch">武蔵野北高等学校</a>
+        <a href="https://lib-finder.net/koganeikita/" target="_blank" class="school-link west-branch">小金井北高等学校</a>
+        <a href="https://lib-finder.net/hoya/" target="_blank" class="school-link west-branch">保谷高等学校</a>
+        <a href="https://lib-finder.net/kurumenishi/" target="_blank" class="school-link west-branch">久留米西高等学校</a>
+        <a href="https://lib-finder.net/tanashi/" target="_blank" class="school-link west-branch">田無高等学校</a>
+        <a href="https://lib-finder.net/kodaira/" target="_blank" class="school-link west-branch">小平高等学校</a>
+        <a href="https://lib-finder.net/kodairanishi/" target="_blank" class="school-link west-branch">小平西高等学校</a>
+        <a href="https://lib-finder.net/higashimurayamanishi/" target="_blank" class="school-link west-branch">東村山西高等学校</a>
+        <a href="https://lib-finder.net/higashikurumesogo/" target="_blank" class="school-link west-branch">東久留米総合高等学校</a>
+        <a href="https://lib-finder.net/kokubunji/" target="_blank" class="school-link west-branch">国分寺高等学校</a>
+        <a href="https://lib-finder.net/kiyose/" target="_blank" class="school-link west-branch">清瀬高等学校</a>
+        <a href="https://lib-finder.net/kodairaminami/" target="_blank" class="school-link west-branch">小平南高等学校</a>
+        <a href="https://lib-finder.net/tamakoka/" target="_blank" class="school-link west-branch">多摩工科高等学校</a>
+        <a href="https://lib-finder.net/tamakagakugijutsu-koganeikogyo/" target="_blank" class="school-link west-branch">多摩科学技術・小金井工科高等学校</a>
+        <a href="https://lib-finder.net/tanashikogyo/" target="_blank" class="school-link west-branch">田無工科高等学校</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 専門高校・総合学科 ── -->
+<div class="tab-panel" id="special">
+  <div class="content-area">
+    <div class="spine">
+      <span class="spine-num">Special</span>
+      <div class="spine-rule"></div>
+      <div class="spine-dot"></div>
+    </div>
+    <div class="main-area">
+      <div class="section-tag reveal">専門高校・総合学科</div>
+      <div class="section-headline reveal">専門高校 · 総合学科</div>
+
+      <div class="sub-nav reveal">
+        <button class="sub-tab active" data-sub="commercial">商業科</button>
+        <button class="sub-tab" data-sub="agriculture">農業科</button>
+        <button class="sub-tab" data-sub="industrial">工業科</button>
+        <button class="sub-tab" data-sub="comprehensive">総合学科</button>
+      </div>
+
+      <!-- 商業科 -->
+      <div class="sub-panel active" id="commercial">
+        <div class="sub-headline">商業科 — Commercial Studies</div>
+        <div class="school-grid">
+          <a href="https://lib-finder.net/shibasho/" target="_blank" class="school-link special-link">芝商業高等学校</a>
+          <a href="https://lib-finder.net/ohtasakuradai/" target="_blank" class="school-link special-link">大田桜台高等学校</a>
+          <a href="https://lib-finder.net/daiichishogyo/" target="_blank" class="school-link special-link">第一商業高等学校</a>
+          <a href="https://lib-finder.net/daiyonshogyo/" target="_blank" class="school-link special-link">第四商業高等学校</a>
+          <a href="https://lib-finder.net/chihaya/" target="_blank" class="school-link special-link">千早高等学校</a>
+          <a href="https://lib-finder.net/katsushikashogyo/" target="_blank" class="school-link special-link">葛飾商業高等学校</a>
+          <a href="https://lib-finder.net/kotoshogyo/" target="_blank" class="school-link special-link">江東商業高等学校</a>
+          <a href="https://lib-finder.net/daisanshogyo/" target="_blank" class="school-link special-link">第三商業高等学校</a>
+          <a href="https://lib-finder.net/daigoshogyo/" target="_blank" class="school-link special-link">第五商業高等学校</a>
+        </div>
+      </div>
+
+      <!-- 農業科 -->
+      <div class="sub-panel" id="agriculture">
+        <div class="sub-headline">農業科 — Agricultural Studies</div>
+        <div class="school-grid">
+          <a href="https://lib-finder.net/engei/" target="_blank" class="school-link special-link">園芸高等学校</a>
+          <a href="https://lib-finder.net/nogyo/" target="_blank" class="school-link special-link">農業高等学校</a>
+          <a href="https://lib-finder.net/nosan/" target="_blank" class="school-link special-link">農産高等学校</a>
+          <a href="https://lib-finder.net/mizuhonogei/" target="_blank" class="school-link special-link">瑞穂農芸高等学校</a>
+          <a href="https://lib-finder.net/nogei/" target="_blank" class="school-link special-link">農芸高等学校</a>
+          <a href="https://lib-finder.net/ojima/" target="_blank" class="school-link special-link">大島高等学校</a>
+          <a href="https://lib-finder.net/miyake/" target="_blank" class="school-link special-link">三宅高等学校</a>
+          <a href="https://lib-finder.net/hachijo/" target="_blank" class="school-link special-link">八丈高等学校</a>
+        </div>
+      </div>
+
+      <!-- 工業科 -->
+      <div class="sub-panel" id="industrial">
+        <div class="sub-headline">工業科 — Industrial Studies</div>
+        <div class="school-grid">
+          <a href="https://lib-finder.net/sogokoka/" target="_blank" class="school-link special-link">総合工科高等学校</a>
+          <a href="https://lib-finder.net/nakanokogyo/" target="_blank" class="school-link special-link">中野工科高等学校</a>
+          <a href="https://lib-finder.net/suginamikogyo/" target="_blank" class="school-link special-link">杉並工科高等学校</a>
+          <a href="https://lib-finder.net/nerimakogyo/" target="_blank" class="school-link special-link">練馬工科高等学校</a>
+          <a href="https://lib-finder.net/kogei/" target="_blank" class="school-link special-link">工芸高等学校</a>
+          <a href="https://lib-finder.net/kitastohimakogyo/" target="_blank" class="school-link special-link">北豊島工科高等学校</a>
+          <a href="https://lib-finder.net/kuramaekogyo/" target="_blank" class="school-link special-link">蔵前工科高等学校</a>
+          <a href="https://lib-finder.net/arakawakogyo/" target="_blank" class="school-link special-link">荒川工科高等学校</a>
+          <a href="https://lib-finder.net/kagakugijutsu/" target="_blank" class="school-link special-link">科学技術高等学校</a>
+          <a href="https://lib-finder.net/sumidakogyo/" target="_blank" class="school-link special-link">墨田工科高等学校</a>
+          <a href="https://lib-finder.net/machidakogyo/" target="_blank" class="school-link special-link">町田工科高等学校</a>
+          <a href="https://lib-finder.net/kasaikogyo/" target="_blank" class="school-link special-link">葛西工科高等学校</a>
+          <a href="https://lib-finder.net/adachikogyo/" target="_blank" class="school-link special-link">足立工科高等学校</a>
+          <a href="https://lib-finder.net/tamakogyo/" target="_blank" class="school-link special-link">多摩工科高等学校</a>
+          <a href="https://lib-finder.net/tamakagakugijutsu/" target="_blank" class="school-link special-link">多摩科学技術・小金井工科高等学校</a>
+          <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link special-link">葛飾総合・本所工科高等学校</a>
+          <a href="https://lib-finder.net/tanashikogyo/" target="_blank" class="school-link special-link">田無工科高等学校</a>
+          <a href="https://lib-finder.net/fuchukogyo/" target="_blank" class="school-link special-link">府中工科高等学校</a>
+          <a href="https://lib-finder.net/rokugokoka/" target="_blank" class="school-link special-link">六郷工科高等学校</a>
+        </div>
+      </div>
+
+      <!-- 総合学科 -->
+      <div class="sub-panel" id="comprehensive">
+        <div class="sub-headline">総合学科 — Comprehensive Studies</div>
+        <div class="school-grid">
+          <a href="https://lib-finder.net/tsubasasogo/" target="_blank" class="school-link special-link">つばさ総合高等学校</a>
+          <a href="https://lib-finder.net/setagayasogo/" target="_blank" class="school-link special-link">世田谷総合高等学校</a>
+          <a href="https://lib-finder.net/suginamisogo/" target="_blank" class="school-link special-link">杉並総合高等学校</a>
+          <a href="https://lib-finder.net/ojisogo/" target="_blank" class="school-link special-link">王子総合高等学校</a>
+          <a href="https://lib-finder.net/harumisogo/" target="_blank" class="school-link special-link">晴海総合高等学校</a>
+          <a href="https://lib-finder.net/katsushikasogo/" target="_blank" class="school-link special-link">葛飾総合・本所工科高等学校</a>
+          <a href="https://lib-finder.net/machidasogo/" target="_blank" class="school-link special-link">町田総合高等学校</a>
+          <a href="https://lib-finder.net/omesogo/" target="_blank" class="school-link special-link">青梅総合高等学校</a>
+          <a href="https://lib-finder.net/higashikurumesogo/" target="_blank" class="school-link special-link">東久留米総合高等学校</a>
+          <a href="https://lib-finder.net/wakabasogo/" target="_blank" class="school-link special-link">若葉総合高等学校</a>
+          <a href="https://lib-finder.net/roppongi/" target="_blank" class="school-link special-link">六本木高等学校</a>
+          <a href="https://lib-finder.net/setagayaizumi/" target="_blank" class="school-link special-link">世田谷泉高等学校</a>
+          <a href="https://lib-finder.net/minorigaoka/" target="_blank" class="school-link special-link">稔ヶ丘高等学校</a>
+          <a href="https://lib-finder.net/kirigaoka/" target="_blank" class="school-link special-link">桐ヶ丘高等学校</a>
+          <a href="https://lib-finder.net/ohedo/" target="_blank" class="school-link special-link">大江戸高等学校</a>
+          <a href="https://lib-finder.net/odaibashi/" target="_blank" class="school-link special-link">小台橋高等学校</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="stream-break" style="margin-bottom: 0;">
+    <div class="stream-break-line"></div>
+    <div class="stream-break-tag">Colophon</div>
+    <div class="stream-break-line"></div>
+  </div>
+  <div class="footer-colophon">
+    <div class="footer-col">
+      <div class="footer-col-label">System</div>
+      <div class="footer-col-value"><em>LibFinder Search</em><br>図書館横断検索</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-label">Scope</div>
+      <div class="footer-col-value"><em>東京都立高等学校</em><br>Tokyo Metropolitan<br>High Schools</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-label">Categories</div>
+      <div class="footer-col-value"><em>東部 · 中部 · 西部</em><br>本所 · 支所<br>専門高校 · 総合学科</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-label">Access</div>
+      <div class="footer-col-value"><em>lib-finder.net</em><br>各校図書館<br>蔵書検索システム</div>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="footer-credit">Tokyo Metropolitan Board of Education — Library Network</div>
+    <div class="footer-end">fin.</div>
+  </div>
+</footer>
+
+<script>
+// Progress bar
+const prog = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  prog.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+}, { passive: true });
+
+// Reveal on scroll
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.05 });
+
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  el.style.transitionDelay = (i * 0.06) + 's';
+  obs.observe(el);
+});
+
+// Tab navigation
+document.querySelectorAll('.nav-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(target).classList.add('active');
+
+    // re-trigger reveal for newly visible elements
+    document.querySelectorAll('#' + target + ' .reveal').forEach(el => {
+      if (!el.classList.contains('visible')) {
+        el.classList.add('visible');
+      }
+    });
+  });
+});
+
+// Sub tab navigation
+document.querySelectorAll('.sub-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.sub;
+    btn.closest('.main-area').querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+    btn.closest('.main-area').querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+// Search
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  const panel = document.getElementById('search-results');
+  const grid = document.getElementById('results-grid');
+  const label = document.getElementById('results-label');
+
+  if (!q) return;
+
+  const all = document.querySelectorAll('.tab-panel .school-link');
+  const found = [];
+  all.forEach(link => {
+    if (link.textContent.includes(q)) {
+      found.push(link.cloneNode(true));
+    }
+  });
+
+  grid.innerHTML = '';
+  if (found.length > 0) {
+    label.textContent = `Results — ${found.length} 件`;
+    found.forEach(l => grid.appendChild(l));
+  } else {
+    label.textContent = 'Results — 0 件';
+    const msg = document.createElement('p');
+    msg.style.cssText = 'font-family: Josefin Sans; font-size: 9px; letter-spacing: 0.4em; color: var(--muted); padding: 20px 0; text-transform: uppercase;';
+    msg.textContent = 'No results found';
+    grid.appendChild(msg);
+  }
+  panel.classList.add('visible');
+}
+
+document.getElementById('search-button').addEventListener('click', doSearch);
+document.getElementById('search-input').addEventListener('keyup', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+document.getElementById('reset-button').addEventListener('click', () => {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results').classList.remove('visible');
+  document.getElementById('results-grid').innerHTML = '';
+});
+</script>
 </body>
 </html>
